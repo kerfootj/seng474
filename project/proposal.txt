@@ -1,0 +1,18 @@
+Title:
+Traffic Collision Prediction using National Collision Database
+
+
+2-3 sentence description:
+The Government of Canada has vehical collision records from 1999 to 2017. The data set contains data such as weather conditions, vehical type, and driver age/gender. The goal of the project would be to predict traffic collisions which could provide usefull information to motorists and emergency crews.
+
+
+Your name:
+Joel Kerfoot
+
+
+Undergraduate or graduate student:
+UNDERGRAD
+
+
+Your email address:
+kerfootj@uvic.ca
