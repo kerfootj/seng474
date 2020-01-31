@@ -91,7 +91,7 @@ def main():
   graph = '-g' in sys.argv
 
   data = None
-  with open('data/' + file_name , 'rb') as f:
+  with open('data/' + file_name, 'rb') as f:
     data = pickle.load(f)
 
   entropy_tree = get_best_tree(data, criterion="entropy", graph=graph)
