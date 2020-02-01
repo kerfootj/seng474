@@ -11,14 +11,16 @@ def format_data(unformated):
 
 if len(sys.argv) < 3:
   print('Expected 3 arguments got {}'.format(len(sys.argv)))
-  print('Usage: python process_data.py <training set %> <output file name>')
+  print('Usage: python process_data.py <training set %> <input data file> <input name file> <output file name>')
   exit()
 
 tr_percent = float(sys.argv[1])
-file_name = sys.argv[2]
+in_name = sys.argv[2]
+name_file = sys.argv[3]
+out_name = sys.argv[4]
 
 data = None
-with open('processed.cleveland.data', 'r') as f:
+with open(in_name, 'r') as f:
   reader = csv.reader(f)
   temp = list(reader)
 
@@ -36,7 +38,7 @@ training_data, training_target = format_data(data)
 test_data, test_target = format_data(test)
 
 names = None
-with open('processed.cleveland.names', 'r') as f:
+with open(name_file, 'r') as f:
   reader = csv.reader(f)
   names = list(reader)
 
@@ -49,5 +51,5 @@ d = {
   "class_names": names[1]
 }
 
-with open('data/' + file_name, 'wb') as f:
+with open('data/' + out_name, 'wb') as f:
   pickle.dump(d, f)

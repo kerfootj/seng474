@@ -51,10 +51,8 @@ def get_best_tree(data, criterion, name="", graph=False):
     ax.set_xlabel("alpha")
     ax.set_ylabel("accuracy")
     ax.set_title("Accuracy vs alpha for training and testing sets")
-    ax.plot(ccp_alphas, train_scores, marker='o', label="train",
-            drawstyle="steps-post")
-    ax.plot(ccp_alphas, test_scores, marker='o', label="test",
-            drawstyle="steps-post")
+    ax.plot(ccp_alphas, train_scores, marker='o', label="train", drawstyle="steps-post")
+    ax.plot(ccp_alphas, test_scores, marker='o', label="test", drawstyle="steps-post")
     ax.legend()
 
     plot_name = "images/plot1_" + criterion + ".png" if name == "" else "images/" + name + "_plot1_" + criterion + ".png"
@@ -90,17 +88,21 @@ def main():
   file_name = sys.argv[1]
   graph = '-g' in sys.argv
 
+  out_name = ''
+  if '-n' in sys.argv:
+    out_name = sys.argv[sys.argv.index('-n') + 1]
+
   data = None
   with open('data/' + file_name, 'rb') as f:
     data = pickle.load(f)
 
-  entropy_tree = get_best_tree(data, criterion="entropy", graph=graph)
-  gini_tree = get_best_tree(data, criterion="gini", graph=graph)
+  entropy_tree = get_best_tree(data, criterion="entropy", graph=graph, name=out_name)
+  gini_tree = get_best_tree(data, criterion="gini", graph=graph, name=out_name)
 
   if graph:
     feature_names, class_names = data["feature_names"], data["class_names"]
-    visualize_tree(entropy_tree, feature_names, class_names, "entropy")
-    visualize_tree(gini_tree, feature_names, class_names, "gini")
+    visualize_tree(entropy_tree, feature_names, class_names, "entropy", name=out_name)
+    visualize_tree(gini_tree, feature_names, class_names, "gini", name=out_name)
 
 if __name__ == "__main__":
   main()
