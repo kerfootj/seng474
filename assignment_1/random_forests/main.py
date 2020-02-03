@@ -5,6 +5,20 @@ import sys, pickle
 
 plot_num = 0
 
+def plot_results(x, y, z, plot_name):
+  global plot_num
+  plot_num += 1
+
+  plt.figure(plot_num)
+  fig, ax = plt.subplots()
+  ax.set_xlabel("number of trees")
+  ax.set_ylabel("depth of tree")
+  ax.set_title("Forest Size vs Tree Depth for Training & Testing Sets")
+  p = ax.contour(x, y, z, 20)
+  plt.colorbar(p)
+
+  plt.savefig('images/' + plot_name + '.png')
+
 def generate_forests(data, criterion, max_features, name):
   x_train, y_train = data["training_data"], data["training_target"]
   x_test, y_test = data["test_data"], data["test_target"]
@@ -13,9 +27,9 @@ def generate_forests(data, criterion, max_features, name):
   depths = [1, 2, 3, 4, 5, 6]
 
   best_tree, best_score, best_attrs = None, 0, []
-  X, Y, Z = [], [], []
+  X, Y, Z, T = [], [], [], []
   for estimator in estimators:
-    x, y, z = [], [], []
+    x, y, z, t = [], [], [], []
     for depth in depths:
       clf = RandomForestClassifier(
         criterion=criterion, 
@@ -35,22 +49,17 @@ def generate_forests(data, criterion, max_features, name):
       x.append(estimator)
       y.append(depth)
       z.append(score)
+      t.append(clf.score(x_train, y_train))
 
     X.append(x)
     Y.append(y)
     Z.append(z)
+    T.append(t)
 
-  global plot_num
-  plot_num += 1
-
-  plt.figure(plot_num)
-  plt.contour(X, Y, Z, 20)
-  plt.colorbar()
-
-  feature_name = 'none' if max_features == None else max_features
-  plot_name = name + '_' + criterion + '_' + feature_name
-  plt.savefig('images/' + plot_name + '.png')
-
+  plot_name = name + '_' + criterion
+  plot_results(X, Y, Z, plot_name + '_train')
+  plot_results(X, Y, T, plot_name + '_test')
+  
   return best_tree, best_score, best_attrs
 
 
