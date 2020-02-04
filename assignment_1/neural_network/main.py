@@ -15,8 +15,9 @@ def generate_networks(data, solver, name):
     clf = MLPClassifier(
       solver=solver, 
       hidden_layer_sizes=size, 
-      alpha=0.00001,
-      learning_rate='adaptive'
+      alpha=0.001,
+      learning_rate='adaptive',
+      random_state=0
     )
     clf.fit(x_train, y_train)
     clfs.append(clf)
