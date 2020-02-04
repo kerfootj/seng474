@@ -5,7 +5,7 @@ import sys, pickle
 
 plot_num = 0
 
-def plot_results(x, y, z, plot_name):
+def plot_results(x, y, z, plot_name, version):
   global plot_num
   plot_num += 1
 
@@ -13,11 +13,11 @@ def plot_results(x, y, z, plot_name):
   fig, ax = plt.subplots()
   ax.set_xlabel("number of trees")
   ax.set_ylabel("depth of tree")
-  ax.set_title("Forest Size vs Tree Depth for Training & Testing Sets")
+  ax.set_title("Forest Size vs Tree Depth for " + version.capitalize() + "ing Set")
   p = ax.contour(x, y, z, 20)
   plt.colorbar(p)
 
-  plt.savefig('images/' + plot_name + '.png')
+  plt.savefig('images/' + plot_name + '_' + version + '.png')
 
 def generate_forests(data, criterion, max_features, name):
   x_train, y_train = data["training_data"], data["training_target"]
@@ -57,8 +57,8 @@ def generate_forests(data, criterion, max_features, name):
     T.append(t)
 
   plot_name = name + '_' + criterion
-  plot_results(X, Y, Z, plot_name + '_train')
-  plot_results(X, Y, T, plot_name + '_test')
+  plot_results(X, Y, Z, plot_name, 'test')
+  plot_results(X, Y, T, plot_name, 'train')
   
   return best_tree, best_score, best_attrs
 
