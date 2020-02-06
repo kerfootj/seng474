@@ -58,7 +58,8 @@ def get_best_tree(data, criterion, name="", graph=False):
     plot_name = "images/plot1_" + criterion + ".png" if name == "" else "images/" + name + "_plot1_" + criterion + ".png"
     plt.savefig(plot_name)
 
-  return clfs[test_scores.index(max(test_scores))]
+  i = test_scores.index(max(test_scores))
+  return clfs[i], train_scores[i], test_scores[i], node_counts[i]
 
 def visualize_tree(tree, feature_names, class_names, criterion, name=""):
   dot_data = StringIO()
@@ -93,11 +94,14 @@ def main():
     out_name = sys.argv[sys.argv.index('-n') + 1]
 
   data = None
-  with open('data/' + file_name, 'rb') as f:
+  with open(file_name, 'rb') as f:
     data = pickle.load(f)
 
-  entropy_tree = get_best_tree(data, criterion="entropy", graph=graph, name=out_name)
-  gini_tree = get_best_tree(data, criterion="gini", graph=graph, name=out_name)
+  entropy_tree, e_tr, e_te, e_nc = get_best_tree(data, criterion="entropy", graph=graph, name=out_name)
+  gini_tree, g_tr, g_te, g_nc = get_best_tree(data, criterion="gini", graph=graph, name=out_name)
+
+  print('{} {} {}'.format(e_tr, e_te, e_nc))
+  print('{} {} {}'.format(g_tr, g_te, g_nc))
 
   if graph:
     feature_names, class_names = data["feature_names"], data["class_names"]

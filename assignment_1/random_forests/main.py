@@ -26,7 +26,7 @@ def generate_forests(data, criterion, max_features, name):
   estimators = [2, 10, 18, 26, 34, 42, 50, 58]
   depths = [1, 2, 3, 4, 5, 6]
 
-  best_tree, best_score, best_attrs = None, 0, []
+  best_tree, best_score, best_train, best_attrs = None, 0, 0, []
   X, Y, Z, T = [], [], [], []
   for estimator in estimators:
     x, y, z, t = [], [], [], []
@@ -40,11 +40,13 @@ def generate_forests(data, criterion, max_features, name):
       )
       clf.fit(x_train, y_train)
       score = clf.score(x_test, y_test)
+      scr = clf.score(x_train, y_train)
 
       if (score > best_score):
         best_score = score
         best_tree = clf
         best_attrs = [estimator, depth]
+        best_train = scr
 
       x.append(estimator)
       y.append(depth)
@@ -60,17 +62,17 @@ def generate_forests(data, criterion, max_features, name):
   plot_results(X, Y, Z, plot_name, 'test')
   plot_results(X, Y, T, plot_name, 'train')
   
-  return best_tree, best_score, best_attrs
+  return best_tree, best_score, best_attrs, best_train
 
 
 def get_best_forest(data, criterion, name):
  
-  best_forest_sqrt, best_score_sqrt, best_attrs_sqrt = generate_forests(data, criterion, 'sqrt', name)
-  best_forest_none, best_score_none, best_attrs_none = generate_forests(data, criterion, None, name)
+  best_forest_sqrt, best_score_sqrt, best_attrs_sqrt, best_train = generate_forests(data, criterion, 'sqrt', name)
+  # best_forest_none, best_score_none, best_attrs_none = generate_forests(data, criterion, None, name)
 
-  if best_score_sqrt > best_score_none:
-    return best_forest_sqrt, best_score_sqrt, best_attrs_sqrt.append('sqrt')
-  return best_forest_none, best_score_none, best_attrs_none.append('none')
+  # if best_score_sqrt > best_score_none:
+  return best_forest_sqrt, best_score_sqrt, best_attrs_sqrt, best_train
+  # return best_forest_none, best_score_none, best_attrs_none.append('none')
 
 
 def main():
@@ -85,11 +87,14 @@ def main():
     out_name = sys.argv[sys.argv.index('-n') + 1]
 
   data = None
-  with open('data/' + file_name, 'rb') as f:
+  with open(file_name, 'rb') as f:
     data = pickle.load(f)
 
-  best_tree_gini, best_score_gini, best_attrs_gini = get_best_forest(data, criterion="gini", name=out_name)
-  best_tree_entr, best_score_entr, best_attrs_entr = get_best_forest(data, criterion="entropy", name=out_name)
+  best_tree_gini, best_score_gini, best_attrs_gini, best_train_gini = get_best_forest(data, criterion="gini", name=out_name)
+  best_tree_entr, best_score_entr, best_attrs_entr, best_train_entr = get_best_forest(data, criterion="entropy", name=out_name)
+
+  print('{} {} {}'.format(best_train_entr, best_score_entr, best_attrs_entr))
+  print('{} {} {}'.format(best_train_gini, best_score_gini, best_attrs_gini))
 
 if __name__ == "__main__":
   main()
