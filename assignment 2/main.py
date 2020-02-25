@@ -1,5 +1,7 @@
 from mnist_reader import load_mnist
+from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 
 def filter_data(x, y):
@@ -20,34 +22,48 @@ def process_data():
   x_train, y_train = filter_data(x_train, y_train)
   x_test, y_test = filter_data(x_test, y_test)
 
-  return (x_train, y_train), (x_test, y_test)
+  return ((x_train, y_train), (x_test, y_test))
 
-def train_lr(train, test):
+def plot(x_axis, train_scores, test_scores, title, name):
+  fig, ax = plt.subplots()
+  ax.set_xlabel("regularization strength")
+  ax.set_ylabel("accuracy")
+  ax.set_title(title)
+  ax.plot(x_axis, train_scores, marker='o', label="train")
+  ax.plot(x_axis, test_scores, marker='o', label="test")
+  ax.legend()
+  plt.savefig(name)
+
+def train(data, classifier, c_0, a, itterations=10, name=''):
+  train, test = data
   x_train, y_train = train
   x_test, y_test = test
 
-  c_0 = 0.0001
-  a = 4
-
   c, train_scores, test_scores = [], [], []
-  for i in range(10):
+  for i in range(itterations):
     print(i)
     C = c_0 * a ** i
-    clf = LogisticRegression(penalty='l2', C=C).fit(x_train, y_train)
+    
+    clf = None
+    if classifier == 'lr':
+      clf = LogisticRegression(penalty='l2', C=C).fit(x_train, y_train)
+    else:
+      clf = SVC(kernel='linear', max_iter=200, C=C).fit(x_train, y_train)
+    
     train_scores.append(clf.score(x_train, y_train))
     test_scores.append(clf.score(x_test, y_test))
     c.append(C)
 
-  fig, ax = plt.subplots()
-  ax.set_xlabel("regularization strength")
-  ax.set_ylabel("accuracy")
-  ax.set_title("Accuracy vs regularization for training and testing sets")
-  ax.plot(c, train_scores, marker='o', label="train")
-  ax.plot(c, test_scores, marker='o', label="test")
-  ax.legend()
+  plot(
+    c, 
+    train_scores, 
+    test_scores,
+    f'{name.capitalize()} Accuracy vs Regularization',
+    f'images/{name}.png'
+    )
 
-  plt.savefig('images/logistic_regression.png')
 
 if __name__ == '__main__':
-  train, test = process_data()
-  train_lr(train, test)
+  data = process_data()
+  train(data, 'lr', 0.0001, 4, name="logistic regression")
+  train(data, 'svm', 0.001, 2.7, name="support vector machine")
