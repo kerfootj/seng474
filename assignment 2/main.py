@@ -3,6 +3,7 @@ from sklearn.base import clone
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt
+import numpy as np
 
 def filter_data(x, y):
   x.tolist()
@@ -34,7 +35,7 @@ def plot(x_axis, train_scores, test_scores, title, name):
   ax.legend()
   plt.savefig(name)
 
-def train(data, classifier, c_0, a, itterations=10, name=''):
+def train(data, classifier, c_0, a, name, itterations=10):
   train, test = data
   x_train, y_train = train
   x_test, y_test = test
@@ -62,8 +63,47 @@ def train(data, classifier, c_0, a, itterations=10, name=''):
     f'images/{name}.png'
     )
 
+def flat(l):
+  return [i for s in l for i in s]
+
+def kfold(data, classifier, C, k):
+  train, test = data
+  x_train, y_train = train
+
+  x_chunks = np.split(np.array(x_train), k)
+  y_chunks = np.split(np.array(y_train), k)
+
+  scores = []
+  for i in range(k):
+    print(i)
+    xi_train = []
+    yi_train = []
+    
+    for j in range(k):
+      if j == i:
+        continue
+      xi_train.append(x_chunks[j])
+      yi_train.append(y_chunks[j])
+
+    xi_train = list(flat(xi_train))
+    yi_train = list(flat(yi_train))
+    
+    xi_test = list(x_chunks[i])
+    yi_test = list(y_chunks[i])
+
+    clf = None
+    if classifier == 'lr':
+      clf = LogisticRegression(penalty='l2', C=C).fit(xi_train, yi_train)
+    else:
+      clf = SVC(kernel='linear', max_iter=200, C=C).fit(xi_train, yi_train)
+
+    scores.append(clf.score(xi_test, yi_test))
+
+  return scores
 
 if __name__ == '__main__':
   data = process_data()
-  train(data, 'lr', 0.0001, 4, name="logistic regression")
-  train(data, 'svm', 0.001, 2.7, name="support vector machine")
+  # train(data, 'lr', 0.0001, 4,"logistic regression")
+  # train(data, 'svm', 0.001, 2.7, "support vector machine")
+
+  print(kfold(data, 'lr', 0.02, 5))
