@@ -23,7 +23,8 @@ def process_data():
   x_train, y_train = filter_data(x_train, y_train)
   x_test, y_test = filter_data(x_test, y_test)
 
-  return ((x_train, y_train), (x_test, y_test))
+  mid = int(len(x_train) / 2)
+  return ((x_train, y_train), (x_test, y_test)), ((x_train[:mid], y_train[:mid]), (x_test, y_test))
 
 def plot(x_axis, train_scores, test_scores, title, name):
   fig, ax = plt.subplots()
@@ -49,7 +50,7 @@ def train(data, classifier, c_0, a, name, itterations=10):
     if classifier == 'lr':
       clf = LogisticRegression(penalty='l2', C=C).fit(x_train, y_train)
     else:
-      clf = SVC(kernel='linear', max_iter=200, C=C).fit(x_train, y_train)
+      clf = SVC(kernel='linear', C=C).fit(x_train, y_train)
     
     train_scores.append(clf.score(x_train, y_train))
     test_scores.append(clf.score(x_test, y_test))
@@ -67,8 +68,7 @@ def flat(l):
   return [i for s in l for i in s]
 
 def kfold(data, classifier, C, k):
-  train, test = data
-  x_train, y_train = train
+  x_train, y_train = data
 
   x_chunks = np.split(np.array(x_train), k)
   y_chunks = np.split(np.array(y_train), k)
@@ -93,17 +93,50 @@ def kfold(data, classifier, C, k):
 
     clf = None
     if classifier == 'lr':
-      clf = LogisticRegression(penalty='l2', C=C).fit(xi_train, yi_train)
+      clf = LogisticRegression(penalty='l2', max_iter=200, C=C).fit(xi_train, yi_train)
     else:
-      clf = SVC(kernel='linear', max_iter=200, C=C).fit(xi_train, yi_train)
+      clf = SVC(kernel='linear', C=C).fit(xi_train, yi_train)
 
     scores.append(clf.score(xi_test, yi_test))
 
-  return scores
+  return sum(scores) / len(scores)
+
+def verfify_kfold(data, classifier, C):
+  train, test = data
+  x_train, y_train = train
+  x_test, y_test = test
+
+  clf = None
+  if classifier == 'lr':
+    clf = LogisticRegression(penalty='l2', max_iter=200, C=C).fit(x_train, y_train)
+  else:
+    clf = SVC(kernel='linear', max_iter=200, C=C).fit(x_train, y_train)
+
+  train_score = clf.score(x_train, y_train)
+  test_score = clf.score(x_test, y_test)
+
+  print(f'{classifier} - training: {train_score} testing: {test_score}')
+
+def train_kfold(data, classifier, c_0, a, k=5, itterations=10):
+  train, test = data
+
+  results = []
+  print('training...')
+  for i in range(itterations):
+    print(f'itteration {i}')
+    results.append(kfold(train, classifier, c_0 * a ** i, k))
+
+  best = results.index(max(results))
+  
+  verfify_kfold(data, classifier, c_0 * a ** best)
 
 if __name__ == '__main__':
-  data = process_data()
+  print('processing data...')
+  data, half_data = process_data()
+  print('done processing!')
+  
   # train(data, 'lr', 0.0001, 4,"logistic regression")
-  # train(data, 'svm', 0.001, 2.7, "support vector machine")
+  #train(half_data, 'svm', 0.04, 1.6, "support vector machine")
 
-  print(kfold(data, 'lr', 0.02, 5))
+  # train_kfold(data, 'lr', 0.7, 1.1, k=5) # lr - training: 0.9738333333333333 testing: 0.9585
+  train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
