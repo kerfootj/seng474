@@ -67,7 +67,7 @@ def train(data, classifier, c_0, a, name, itterations=10):
 def flat(l):
   return [i for s in l for i in s]
 
-def kfold(data, classifier, C, k):
+def kfold(data, classifier, C, k, gamma=None):
   x_train, y_train = data
 
   x_chunks = np.split(np.array(x_train), k)
@@ -94,8 +94,10 @@ def kfold(data, classifier, C, k):
     clf = None
     if classifier == 'lr':
       clf = LogisticRegression(penalty='l2', max_iter=200, C=C).fit(xi_train, yi_train)
-    else:
+    elif classifier == 'svm':
       clf = SVC(kernel='linear', C=C).fit(xi_train, yi_train)
+    else:
+      clf = SVC(kernel='rbf', C=C, gamma=gamma).fit(xi_train, yi_train)
 
     scores.append(clf.score(xi_test, yi_test))
 
@@ -116,6 +118,7 @@ def verfify_kfold(data, classifier, C):
   test_score = clf.score(x_test, y_test)
 
   print(f'{classifier} - training: {train_score} testing: {test_score}')
+  return (train_score, test_score)
 
 def train_kfold(data, classifier, c_0, a, k=5, itterations=10):
   train, test = data
@@ -130,13 +133,33 @@ def train_kfold(data, classifier, c_0, a, k=5, itterations=10):
   
   verfify_kfold(data, classifier, c_0 * a ** best)
 
+def train_gausian(data, c_0, a, g_0, b):
+  train, test = data
+  x_train, y_train = train
+
+  cs = []
+  for i in range(10):
+    results = []
+    for j in range(10):
+      C = c_0 * a ** j
+      gamma = 1 /(len(x_train) * g_0 * b ** i)
+      results.append(kfold(train, 'svm gaussian', C, k=5, gamma=gamma))
+    
+    best = results.index(max(results))
+    cs.append(c_0 * a ** best)
+
+  print(cs)
+
+
 if __name__ == '__main__':
   print('processing data...')
   data, half_data = process_data()
   print('done processing!')
-  
+
   # train(data, 'lr', 0.0001, 4,"logistic regression")
   #train(half_data, 'svm', 0.04, 1.6, "support vector machine")
 
   # train_kfold(data, 'lr', 0.7, 1.1, k=5) # lr - training: 0.9738333333333333 testing: 0.9585
-  train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
+  # train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
+
+  train_gausian(data, 0.04, 1.5, 0.01, 1.1)
