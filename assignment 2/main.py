@@ -133,23 +133,44 @@ def train_kfold(data, classifier, c_0, a, k=5, itterations=10):
   
   verfify_kfold(data, classifier, c_0 * a ** best)
 
-def train_gausian(data, c_0, a, g_0, b):
+def train_gaussian(data, c_0, a):
   train, test = data
   x_train, y_train = train
+  x_test, y_test = test
 
   cs = []
-  for i in range(10):
+  gs = []
+  for i in np.logspace(-0.2, 1.0, num=10):
+    print(f'pass: {i}')
+    gamma = (1) /(len(x_train) / i)
+    gs.append(gamma)
     results = []
-    for j in range(10):
-      C = c_0 * a ** j
-      gamma = 1 /(len(x_train) * g_0 * b ** i)
-      results.append(kfold(train, 'svm gaussian', C, k=5, gamma=gamma))
+    for j in range(5, 15):
+      C = c_0 * a ** (2 * j)
+      result = kfold(train, 'svm gaussian', C, k=5, gamma=gamma)
+      results.append(result)
+      print(f'result: {result}')
     
     best = results.index(max(results))
-    cs.append(c_0 * a ** best)
+    cs.append(c_0 * a ** (2 * best))
 
-  print(cs)
+  train_scores, test_scores = [], []
+  for g, c in zip(gs, cs):
+    clf = SVC(kernel='rbf', C=c, gamma=g).fit(x_train, y_train)
+    train_scores.append(clf.score(x_train, y_train))
+    test_scores.append(clf.score(x_test, y_test))
 
+  print(cs) # cs = [0.30375, 0.6834375, 0.455625, 0.455625, 0.455625, 0.6834375]
+  print(gs)
+
+  fig, ax = plt.subplots()
+  ax.set_xlabel("gamma")
+  ax.set_ylabel("accuracy")
+  ax.set_title('Gamma vs Accuracy for Test and Training Sets')
+  ax.plot(gs, train_scores, marker='o', label="train")
+  ax.plot(gs, test_scores, marker='o', label="test")
+  ax.legend()
+  plt.savefig('images/gamma.png')
 
 if __name__ == '__main__':
   print('processing data...')
@@ -162,4 +183,4 @@ if __name__ == '__main__':
   # train_kfold(data, 'lr', 0.7, 1.1, k=5) # lr - training: 0.9738333333333333 testing: 0.9585
   # train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
 
-  train_gausian(data, 0.04, 1.5, 0.01, 1.1)
+  train_gaussian(half_data, 0.04, 1.5)
