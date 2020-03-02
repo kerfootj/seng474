@@ -120,7 +120,7 @@ def verfify_kfold(data, classifier, C):
   train_score = clf.score(x_train, y_train)
   test_score = clf.score(x_test, y_test)
 
-  print(f'{classifier} - training: {train_score} testing: {test_score}')
+  print(f'{classifier}: {C} - training: {train_score} testing: {test_score}')
   return (train_score, test_score)
 
 def train_kfold(data, classifier, c_0, a, k=5, itterations=10):
@@ -143,7 +143,7 @@ def train_gaussian(data, c_0, a):
 
   cs = []
   gs = []
-  for i in np.logspace(1.6, 2.5, num=16) :
+  for i in np.logspace(1.6, 2.5, num=16):
     print(f'pass: {i}')
     gamma = 1 /(len(x_train) / i)
     gs.append(gamma)
@@ -187,3 +187,5 @@ if __name__ == '__main__':
   # train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
 
   train_gaussian(half_data, 0.04, 1.5)
+
+  # [0.006635119509224956, 0.0076181364935812524, 0.008746791004162877, 0.010042659767905963, 0.011530516181982276, 0.013238803912071356, 0.015200180655931827, 0.017452142467514996, 0.020037740576956883, 0.023006404410048087, 0.02641488654101857, 0.030328347643499714, 0.03482160218090065, 0.039980548650324826, 0.04590381172230277, 0.052704627669472995]
