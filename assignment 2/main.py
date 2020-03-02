@@ -56,6 +56,9 @@ def train(data, classifier, c_0, a, name, itterations=10):
     test_scores.append(clf.score(x_test, y_test))
     c.append(C)
 
+  print(f'train: {train_scores}')
+  print(f'train: {test_scores}')
+
   plot(
     c, 
     train_scores, 
@@ -140,9 +143,9 @@ def train_gaussian(data, c_0, a):
 
   cs = []
   gs = []
-  for i in np.logspace(-0.2, 1.0, num=10):
+  for i in np.logspace(0.6, 2.0, num=16) :
     print(f'pass: {i}')
-    gamma = (1) /(len(x_train) / i)
+    gamma = 1 /(len(x_train) / i)
     gs.append(gamma)
     results = []
     for j in range(5, 15):
@@ -178,7 +181,7 @@ if __name__ == '__main__':
   print('done processing!')
 
   # train(data, 'lr', 0.0001, 4,"logistic regression")
-  #train(half_data, 'svm', 0.04, 1.6, "support vector machine")
+  # train(half_data, 'svm', 0.04, 1.6, "support vector machine")
 
   # train_kfold(data, 'lr', 0.7, 1.1, k=5) # lr - training: 0.9738333333333333 testing: 0.9585
   # train_kfold(half_data, 'svm', 0.04, 1.5, k=5) # svm - training: 0.9115 testing: 0.907 
