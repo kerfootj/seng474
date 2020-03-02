@@ -143,7 +143,7 @@ def train_gaussian(data, c_0, a):
 
   cs = []
   gs = []
-  for i in np.logspace(1.6, 2.5, num=16):
+  for i in np.logspace(1.2, 2.2, num=16) :
     print(f'pass: {i}')
     gamma = 1 /(len(x_train) / i)
     gs.append(gamma)
