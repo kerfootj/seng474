@@ -6,6 +6,7 @@
 import sys, csv, random
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def initialize_uniform_random(data, k):
   return random.sample(data, k)
@@ -87,6 +88,20 @@ def plot_2d(clusters, init):
 
   plt.savefig(f"images/{title.replace(' ', '_')}.png")
 
+def plot_3d(clusters, init):
+  fig = plt.figure()
+  ax = Axes3D(fig)
+  title = 'uniform random initialization' if init == 'random' else 'k-means++ initialization'
+  ax.set_title(f'k-means - {title}')
+
+  for key in clusters.keys():
+    x = [a[0] for a in clusters[key]]
+    y = [a[1] for a in clusters[key]]
+    z = [a[2] for a in clusters[key]]
+    ax.scatter(x, y, z, marker='.')
+
+  plt.savefig(f"images/{title.replace(' ', '_')}_3d.png")
+
 def process_data(src):
   data = None
   with open(src, 'r') as f:
@@ -114,7 +129,10 @@ if __name__ == '__main__':
 
   clusters, mu = kmeans(data, k, init)
 
-  print(calculate_error(clusters, mu))
+  # print(calculate_error(clusters, mu))
 
   if plot_results and dimension == 2:
     plot_2d(clusters, init)
+
+  if plot_results and dimension == 3:
+    plot_3d(clusters, init)
