@@ -59,7 +59,7 @@ def has_converged(new_mu, mu):
   # convert coords to tuples and make a set for easy comparison 
   return set([tuple(x) for x in new_mu]) == set([tuple(x) for x in mu])
 
-def kmeans(X, k, init, n=16):
+def kmeans(X, k, init, n=10):
   mu = initialize_uniform_random(X, k) if init == 'random' else initialize_kmeans_plusplus(X, k)
   for _ in range(16):
     clusters = cluster(X, mu)
@@ -76,7 +76,7 @@ def calculate_error(clusters, mu):
       error += np.linalg.norm(x-mu[key])
   return error  
 
-def plot_2d(clusters, init):
+def plot_2d(clusters, init, k):
   fig, ax = plt.subplots()
   title = 'uniform random initialization' if init == 'random' else 'k-means++ initialization'
   ax.set_title(f'k-means - {title}')
@@ -86,9 +86,9 @@ def plot_2d(clusters, init):
     y = [a[1] for a in clusters[key]]
     ax.scatter(x, y, marker='.')
 
-  plt.savefig(f"images/{title.replace(' ', '_')}.png")
+  plt.savefig(f"images/{title.replace(' ', '_')}_2d_{k}.png")
 
-def plot_3d(clusters, init):
+def plot_3d(clusters, init, k):
   fig = plt.figure()
   ax = Axes3D(fig)
   title = 'uniform random initialization' if init == 'random' else 'k-means++ initialization'
@@ -100,7 +100,7 @@ def plot_3d(clusters, init):
     z = [a[2] for a in clusters[key]]
     ax.scatter(x, y, z, marker='.')
 
-  plt.savefig(f"images/{title.replace(' ', '_')}_3d.png")
+  plt.savefig(f"images/{title.replace(' ', '_')}_3d_{k}.png")
 
 def process_data(src):
   data = None
@@ -127,12 +127,22 @@ if __name__ == '__main__':
   data = process_data(data_src)
   dimension = len(data[0])
 
-  clusters, mu = kmeans(data, k, init)
+  if k <= 0:
+    for i in range(2, 8):
+      clusters, mu = kmeans(data, i, init)
 
-  # print(calculate_error(clusters, mu))
+      if plot_results and dimension == 2:
+        plot_2d(clusters, init, i)
 
-  if plot_results and dimension == 2:
-    plot_2d(clusters, init)
+      if plot_results and dimension == 3:
+        plot_3d(clusters, init, i)
 
-  if plot_results and dimension == 3:
-    plot_3d(clusters, init)
+  else:
+    clusters, mu = kmeans(data, k, init)
+
+    if plot_results and dimension == 2:
+      plot_2d(clusters, init, k)
+
+    if plot_results and dimension == 3:
+      plot_3d(clusters, init, k)
+  
