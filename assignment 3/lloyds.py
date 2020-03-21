@@ -76,6 +76,15 @@ def calculate_error(clusters, mu):
       error += np.linalg.norm(x-mu[key])
   return error  
 
+def plot_error(errors, init, dimension):
+  x = list(range(2,13))
+  fig, ax = plt.subplots()
+  title = 'uniform random initialization' if init == 'random' else 'k-means++ initialization'
+  ax.set_title(f'Cost vs k - {title}')
+
+  ax.plot(x, errors)
+  plt.savefig(f"images/cost/{title.replace(' ', '_')}_{dimension}d.png")
+
 def plot_2d(clusters, init, k):
   fig, ax = plt.subplots()
   title = 'uniform random initialization' if init == 'random' else 'k-means++ initialization'
@@ -128,14 +137,19 @@ if __name__ == '__main__':
   dimension = len(data[0])
 
   if k <= 0:
-    for i in range(2, 8):
+    errors = []
+    for i in range(2,13):
       clusters, mu = kmeans(data, i, init)
+
+      errors.append(calculate_error(clusters, mu))
 
       if plot_results and dimension == 2:
         plot_2d(clusters, init, i)
 
       if plot_results and dimension == 3:
         plot_3d(clusters, init, i)
+
+    plot_error(errors, init, dimension)
 
   else:
     clusters, mu = kmeans(data, k, init)
